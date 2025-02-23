@@ -173,10 +173,17 @@ class NoteDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
     }
 
     /** Get a Specific Note by ID */
+    /** Get All Notes by Folder ID and Sort by Priority */
     fun getAllNotesByFolderId(folderId: Int): List<Note> {
         val notesList = mutableListOf<Note>()
         val db = readableDatabase
-        val cursor: Cursor = db.rawQuery("SELECT * FROM $TABLE_NOTES WHERE $COLUMN_FOLDER_ID = ?", arrayOf(folderId.toString()))
+        val cursor: Cursor = db.rawQuery(
+            "SELECT * FROM $TABLE_NOTES WHERE $COLUMN_FOLDER_ID = ? ORDER BY CASE " +
+                    "WHEN $COLUMN_PRIORITY = 'High' THEN 1 " +
+                    "WHEN $COLUMN_PRIORITY = 'Medium' THEN 2 " +
+                    "WHEN $COLUMN_PRIORITY = 'Low' THEN 3 " +
+                    "ELSE 4 END", arrayOf(folderId.toString())
+        )
 
         while (cursor.moveToNext()) {
             val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_NOTE_ID))

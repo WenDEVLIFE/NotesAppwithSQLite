@@ -16,4 +16,7 @@
     <color name="grayblue">#C1CDE5</color>
     <color name="cardNewColor">#61AAC5</color>
     <color name="cardNewDarkerColor">#4C869B</color>
+    <color name="priority_high">#D32F2F</color>   <!-- Muted Red -->
+    <color name="priority_medium">#FBC02D</color> <!-- Muted Yellow -->
+    <color name="priority_low">#388E3C</color>    <!-- Muted Green -->
 </resources>

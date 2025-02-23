@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesappwithsqlite.R
 import com.example.notesappwithsqlite.UpdateNoteActivity
@@ -41,6 +42,15 @@ class NotesAdapter(private var notes: List<Note>, private val context: Context) 
         holder.subjectTextView.text = note.subject
         holder.contentTextView.text = note.content
 
+        // Set the card background color based on the note priority
+        val colorId = when (note.priority) {
+            "High" -> R.color.priority_high
+            "Medium" -> R.color.priority_medium
+            "Low" -> R.color.priority_low
+            else -> R.color.priority_low // Default to low if priority is not recognized
+        }
+        (holder.itemView as androidx.cardview.widget.CardView).setCardBackgroundColor(ContextCompat.getColor(context, colorId))
+
         holder.updateButton.setOnClickListener {
             val intent = Intent(holder.itemView.context, UpdateNoteActivity::class.java).apply {
                 putExtra("note_id", note.id)
@@ -55,7 +65,6 @@ class NotesAdapter(private var notes: List<Note>, private val context: Context) 
             Toast.makeText(holder.itemView.context, "Note Deleted", Toast.LENGTH_SHORT).show()
         }
     }
-
     fun refreshData(newNotes: List<Note>) {
         notes = newNotes
         notifyDataSetChanged()
