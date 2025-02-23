@@ -5,8 +5,13 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.os.Build
+import android.widget.EditText
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import com.example.notesappwithsqlite.model.Note
 import com.example.notesappwithsqlite.model.Folder
+import java.time.LocalDateTime
 
 class NoteDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -28,13 +33,15 @@ class NoteDatabaseHelper(context: Context) :
         private const val TABLE_FOLDERS = "allfolders"
         private const val COLUMN_FOLDER_ID_PRIMARY = "id"
         private const val COLUMN_FOLDER_NAME = "name"
+        private const val COLUMN_USER_ID = "user_id" // Add userId column
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
         val createFoldersTable = """
             CREATE TABLE $TABLE_FOLDERS (
                 $COLUMN_FOLDER_ID_PRIMARY INTEGER PRIMARY KEY AUTOINCREMENT,
-                $COLUMN_FOLDER_NAME TEXT NOT NULL
+                $COLUMN_FOLDER_NAME TEXT NOT NULL,
+                $COLUMN_USER_ID INTEGER NOT NULL
             )
         """.trimIndent()
 
@@ -60,62 +67,60 @@ class NoteDatabaseHelper(context: Context) :
         onCreate(db)
     }
 
-    /** Insert a Folder */
-    fun insertFolder(folderName: String): Long {
-        val db = writableDatabase
-        val values = ContentValues().apply {
-            put(COLUMN_FOLDER_NAME, folderName)
-        }
-        val folderId = db.insert(TABLE_FOLDERS, null, values)
-        db.close()
-        return folderId
-    }
-
-    /** Insert a Note linked to a Folder */
-    fun insertNote(note: Note, folderId: Int) {
-        val db = writableDatabase
-        val values = ContentValues().apply {
-            put(COLUMN_FOLDER_ID, folderId)
-            put(COLUMN_SUBJECT, note.subject)
-            put(COLUMN_DATE, note.date)
-            put(COLUMN_TITLE, note.title)
-            put(COLUMN_CONTENT, note.content)
-        }
-        db.insert(TABLE_NOTES, null, values)
-        db.close()
-    }
-
-    /** Get All Notes by Folder */
-    fun getNotesByFolder(folderId: Int): List<Note> {
-        val notesList = mutableListOf<Note>()
-        val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM $TABLE_NOTES WHERE $COLUMN_FOLDER_ID = ?", arrayOf(folderId.toString()))
-
-        while (cursor.moveToNext()) {
-            val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_NOTE_ID))
-            val subject = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SUBJECT))
-            val date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))
-            val title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE))
-            val content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT))
-
-            notesList.add(Note(id, subject, date, title, content))
-        }
-
-        cursor.close()
-        db.close()
-        return notesList
-    }
-
-    /** Get All Folders */
-    fun getAllFolders(): List<Folder> {
+    /** Get All Folders by User */
+    fun getFoldersByUser(userId: Int): List<Folder> {
         val folderList = mutableListOf<Folder>()
         val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM $TABLE_FOLDERS", null)
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_FOLDERS WHERE $COLUMN_USER_ID = ?", arrayOf(userId.toString()))
 
         while (cursor.moveToNext()) {
             val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FOLDER_ID_PRIMARY))
             val name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FOLDER_NAME))
-            folderList.add(Folder(id, name))
+            val date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))
+            folderList.add(Folder(id, name, date, userId))
+        }
+
+        cursor.close()
+        db.close()
+        return folderList
+    }
+
+    /** Insert a Note linked to a Folder */
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun insertFolder(folderName: String, userId: Int?, input: EditText) : Long {
+       try {
+           val db = writableDatabase
+
+           val localDate = LocalDateTime.now()
+           var date = localDate.toString()
+           val values = ContentValues().apply {
+               put(COLUMN_FOLDER_NAME, folderName)
+               put(COLUMN_DATE, date)  // Include date
+               put(COLUMN_USER_ID, userId)
+           }
+           val folderId = db.insert(TABLE_FOLDERS, null, values)
+           db.close()
+           input.setText("")
+           Toast.makeText(input.context, "Folder added successfully!", Toast.LENGTH_SHORT).show()
+           return folderId
+        } catch (e: Exception) {
+            Toast.makeText(input.context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            return -1
+        }
+    }
+
+    /** Get All Folders */
+    fun getAllFolders(userId: Int): List<Folder> {
+
+        val folderList = mutableListOf<Folder>()
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_FOLDERS WHERE $COLUMN_USER_ID = ?", arrayOf(userId.toString()))
+
+        while (cursor.moveToNext()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FOLDER_ID_PRIMARY))
+            val name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FOLDER_NAME))
+            val date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))  // Now valid
+            folderList.add(Folder(id, name, date, userId))
         }
 
         cursor.close()
@@ -133,6 +138,18 @@ class NoteDatabaseHelper(context: Context) :
             put(COLUMN_CONTENT, note.content)
         }
         db.update(TABLE_NOTES, values, "$COLUMN_NOTE_ID = ?", arrayOf(note.id.toString()))
+        db.close()
+    }
+
+    fun insertNote(note: Note, i: Int) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_SUBJECT, note.subject)
+            put(COLUMN_DATE, note.date)
+            put(COLUMN_TITLE, note.title)
+            put(COLUMN_CONTENT, note.content)
+        }
+        db.insert(TABLE_NOTES, null, values)
         db.close()
     }
 

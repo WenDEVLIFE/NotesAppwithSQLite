@@ -33,13 +33,20 @@ class LoginActivity : AppCompatActivity() {
             }
 
             if (userDb.validateLogin(username, password)) {
-                Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
+                val userId = userDb.getUserId(username, password)
+                if (userId != null) {
+                    Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
 
-                val intent = Intent(this, DashboardActivity::class.java)
-                intent.putExtra("USERNAME", username)  // Passing username
-                startActivity(intent)
-                finish()
-            }else {
+                    val intent = Intent(this, DashboardActivity::class.java)
+                    intent.putExtra("USERNAME", username)  // Passing username
+                    intent.putExtra("USER_ID", userId)  // Passing userId
+
+                    startActivity(intent)
+                    finish()
+                } else {
+                    Toast.makeText(this, "User ID not found!", Toast.LENGTH_SHORT).show()
+                }
+            } else {
                 Toast.makeText(this, "Invalid username or password!", Toast.LENGTH_SHORT).show()
             }
         }

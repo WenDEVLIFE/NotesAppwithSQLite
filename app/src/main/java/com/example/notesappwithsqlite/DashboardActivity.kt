@@ -1,13 +1,14 @@
 package com.example.notesappwithsqlite
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.notesappwithsqlite.adapter.NotesAdapter
 import com.example.notesappwithsqlite.databaseController.NoteDatabaseHelper
 import com.example.notesappwithsqlite.databinding.ActivityDashboardBinding
 
@@ -21,6 +22,7 @@ class DashboardActivity : AppCompatActivity() {
         setContentView(binding.root) // Use binding.root instead of R.layout.activity_dashboard
 
         val username = intent.getStringExtra("USERNAME") ?: "Guest"
+        val userId = intent.getIntExtra("USER_ID", -1) // Get userId from intent
 
         // Set username in Navigation Drawer header
         val headerView = binding.navView.getHeaderView(0)
@@ -42,6 +44,11 @@ class DashboardActivity : AppCompatActivity() {
             drawerLayout.openDrawer(binding.navView)
         }
 
+        val floatingActionButton = binding.btnAddNote
+        floatingActionButton.setOnClickListener {
+            LoadAddFolder(userId)
+        }
+
         binding.navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_logout -> {
@@ -53,5 +60,30 @@ class DashboardActivity : AppCompatActivity() {
             drawerLayout.closeDrawers() // Close drawer after selection
             true
         }
+    }
+
+    fun LoadAddFolder(userId: Int) {
+        val builder = AlertDialog.Builder(this)
+        // Inflate the custom layout
+        val inflater = layoutInflater
+        val dialogLayout = inflater.inflate(R.layout.dialog_custom, null)
+        val input = dialogLayout.findViewById<EditText>(R.id.editTextFolderName)
+        val btnOk = dialogLayout.findViewById<Button>(R.id.btnOk)
+        val btnCancel = dialogLayout.findViewById<Button>(R.id.btnCancel)
+
+        builder.setView(dialogLayout)
+        val dialog = builder.create()
+
+        // Set up the buttons
+        btnOk.setOnClickListener {
+            val folderName = input.text.toString()
+            db.insertFolder(folderName, userId, input)// Insert folder with userId
+            dialog.dismiss()
+        }
+        btnCancel.setOnClickListener {
+            dialog.cancel()
+        }
+
+        dialog.show()
     }
 }

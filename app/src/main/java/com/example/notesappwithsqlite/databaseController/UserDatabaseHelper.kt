@@ -34,6 +34,22 @@ class UserDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         onCreate(db)
     }
 
+    fun getUserId(username: String, password: String): Int? {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT $COLUMN_ID FROM $TABLE_NAME WHERE $COLUMN_USERNAME = ? AND $COLUMN_PASSWORD = ?",
+            arrayOf(username, password)
+        )
+        return if (cursor.moveToFirst()) {
+            val userId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID))
+            cursor.close()
+            userId
+        } else {
+            cursor.close()
+            null
+        }
+    }
+
     fun registerUser(username: String, age: Int, password: String): Boolean {
         val db = writableDatabase
         val values = ContentValues().apply {
