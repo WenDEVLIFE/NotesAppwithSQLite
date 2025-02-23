@@ -4,7 +4,9 @@ import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.notesappwithsqlite.databaseController.NoteDatabaseHelper
 import com.example.notesappwithsqlite.databinding.ActivityUpdateNoteBinding
+import com.example.notesappwithsqlite.model.Note
 import java.util.*
 
 class UpdateNoteActivity : AppCompatActivity() {
@@ -58,7 +60,8 @@ class UpdateNoteActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val updatedNote = Note(noteID, newSubjectTitle, newDate, newTitle, newContent) // Correct order
+            val updatedNote =
+                Note(noteID, newSubjectTitle, newDate, newTitle, newContent) // Correct order
             db.updateNote(updatedNote)
 
             Toast.makeText(this, "Changes Saved!", Toast.LENGTH_SHORT).show()

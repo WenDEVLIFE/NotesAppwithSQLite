@@ -6,7 +6,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".DashboardActivity">
 
     <!-- Main Content -->
 
@@ -17,33 +17,6 @@
         android:layout_height="match_parent"
         android:background="@color/background"
         android:paddingTop="20dp">
-
-        <LinearLayout
-            android:id="@+id/lltop"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/ivOpenMenu"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_menu" />
-
-            <TextView
-                android:id="@+id/tvNotes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:fontFamily="@font/product_sans_bold"
-                android:text="Dashboard"
-                android:textColor="@color/darkblue"
-                android:textSize="36sp" />
-        </LinearLayout>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnAddNote"
@@ -61,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="-3dp">
+            >
 
             <TextView
                 android:id="@+id/tvNotes2"
@@ -69,8 +42,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:fontFamily="@font/product_sans_bold"
-                android:text="My Folders"
                 android:padding="12dp"
+                android:text="My Folders"
                 android:textColor="@color/darkblue"
                 android:textSize="36sp"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
@@ -80,12 +53,12 @@
                 android:id="@+id/constraintLayout"
                 android:layout_width="150dp"
                 android:layout_height="100dp"
-                android:layout_marginTop="88dp"
+                android:layout_marginTop="16dp"
                 android:background="@color/darkblue"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.103"
+                app:layout_constraintHorizontal_bias="0.134"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/lltop">
 
                 <TextView
                     android:id="@+id/textView"
@@ -94,8 +67,8 @@
                     android:layout_marginTop="16dp"
                     android:fontFamily="sans-serif-condensed"
                     android:text="Folders"
-                    android:textSize="20dp"
                     android:textColor="@color/white"
+                    android:textSize="20dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.504"
                     app:layout_constraintStart_toStartOf="parent"
@@ -121,12 +94,12 @@
                 android:layout_width="150dp"
                 android:layout_height="100dp"
                 android:layout_marginStart="4dp"
-                android:layout_marginTop="88dp"
+                android:layout_marginTop="16dp"
                 android:background="@color/darkblue"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.538"
+                app:layout_constraintHorizontal_bias="0.444"
                 app:layout_constraintStart_toEndOf="@+id/constraintLayout"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/lltop">
 
                 <TextView
                     android:id="@+id/textView3"
@@ -165,6 +138,33 @@
                 app:layout_constraintTop_toBottomOf="@+id/tvNotes2"
                 app:layout_constraintVertical_bias="1.0"
                 tools:layout_editor_absoluteX="16dp" />
+
+            <LinearLayout
+                android:id="@+id/lltop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout_editor_absoluteX="13dp">
+
+                <ImageView
+                    android:id="@+id/ivOpenMenu"
+                    android:layout_width="30dp"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_menu" />
+
+                <TextView
+                    android:id="@+id/tvNotes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:fontFamily="@font/product_sans_bold"
+                    android:text="Dashboard"
+                    android:textColor="@color/darkblue"
+                    android:textSize="36sp" />
+            </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </RelativeLayout>
 

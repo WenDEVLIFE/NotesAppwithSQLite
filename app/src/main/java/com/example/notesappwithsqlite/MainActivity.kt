@@ -21,7 +21,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import com.example.notesappwithsqlite.adapter.NotesAdapter
+import com.example.notesappwithsqlite.databaseController.NoteDatabaseHelper
 import com.example.notesappwithsqlite.databinding.ActivityAddNoteBinding
+import com.example.notesappwithsqlite.model.Note
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         profileNameTextView.text = username
 
         db = NoteDatabaseHelper(this)
-        notesAdapter = NotesAdapter(db.getAllNotes(), this)
+        // notesAdapter = NotesAdapter(db.getAllNotes(), this)
 
         binding.btnAddNote.setOnClickListener(){
             val intent = Intent(this, AddNoteActivity::class.java)
@@ -120,16 +123,23 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        notesAdapter.refreshData(db.getAllNotes())
+      //  notesAdapter.refreshData(db.getAllNotes())
         createNotificationChannel()
         sendNotification("We will remind you the notes a day before!")
     }
 
     override fun onStart() {
         super.onStart()
-        if(db.getNoteCount() == 0){
-            val note = Note(0, "General", "2025-02-12", "Welcome to AcadPlanner!", "Created by developers: Rhianne Magsino and Hannah Mae Moran")
+        /* if(db.getNoteCount() == 0){
+            val note = Note(
+                0,
+                "General",
+                "2025-02-12",
+                "Welcome to AcadPlanner!",
+                "Created by developers: Rhianne Magsino and Hannah Mae Moran"
+            )
             db.insertNote(note)
-        }
+
+        }*/
     }
 }

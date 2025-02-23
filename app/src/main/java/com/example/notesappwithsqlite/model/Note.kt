@@ -1,6 +1,4 @@
-package com.example.notesappwithsqlite
-
-import java.sql.Date
+package com.example.notesappwithsqlite.model
 
 data class Note(
     val id: Int,
@@ -9,5 +7,3 @@ data class Note(
     val title: String,
     val content: String
 )
-
-

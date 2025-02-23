@@ -8,7 +8,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.notesappwithsqlite.databaseController.NoteDatabaseHelper
+import com.example.notesappwithsqlite.databaseController.ReminderReceiver
 import com.example.notesappwithsqlite.databinding.ActivityAddNoteBinding
+import com.example.notesappwithsqlite.model.Note
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -73,7 +76,7 @@ class AddNoteActivity : AppCompatActivity() {
         }
 
         val note = Note(0, subjectTitle, selectedDate, title, description)
-        db.insertNote(note)
+        db.insertNote(note , 1) // 1 is the folder id
         Toast.makeText(this, "Note Saved!", Toast.LENGTH_SHORT).show()
 
         // 🔔 Immediate notification

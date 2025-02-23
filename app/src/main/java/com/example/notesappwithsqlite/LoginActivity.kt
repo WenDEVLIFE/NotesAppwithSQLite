@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import com.example.notesappwithsqlite.databaseController.UserDatabaseHelper
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var userDb: UserDatabaseHelper
@@ -34,7 +35,7 @@ class LoginActivity : AppCompatActivity() {
             if (userDb.validateLogin(username, password)) {
                 Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
 
-                val intent = Intent(this, MainActivity::class.java)
+                val intent = Intent(this, DashboardActivity::class.java)
                 intent.putExtra("USERNAME", username)  // Passing username
                 startActivity(intent)
                 finish()

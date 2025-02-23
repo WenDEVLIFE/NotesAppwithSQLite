@@ -46,7 +46,7 @@
         </activity>
 
         <receiver
-            android:name=".ReminderReceiver"
+            android:name=".databaseController.ReminderReceiver"
             android:exported="false" />
 
         <meta-data

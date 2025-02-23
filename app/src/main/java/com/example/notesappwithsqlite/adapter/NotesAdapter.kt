@@ -1,4 +1,4 @@
-package com.example.notesappwithsqlite
+package com.example.notesappwithsqlite.adapter
 
 import android.content.Context
 import android.content.Intent
@@ -9,6 +9,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.notesappwithsqlite.R
+import com.example.notesappwithsqlite.UpdateNoteActivity
+import com.example.notesappwithsqlite.databaseController.NoteDatabaseHelper
+import com.example.notesappwithsqlite.model.Note
 
 class NotesAdapter(private var notes: List<Note>, private val context: Context) : RecyclerView.Adapter<NotesAdapter.NoteViewHolder>() {
 
@@ -46,7 +50,7 @@ class NotesAdapter(private var notes: List<Note>, private val context: Context) 
 
         holder.deleteButton.setOnClickListener {
             db.deleteNote(note.id)
-            refreshData(db.getAllNotes()) // Ensure RecyclerView updates after deleting
+         //   refreshData(db.getAllNotes()) // Ensure RecyclerView updates after deleting
             Toast.makeText(holder.itemView.context, "Note Deleted", Toast.LENGTH_SHORT).show()
         }
     }

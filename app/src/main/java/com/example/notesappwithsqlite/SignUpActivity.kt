@@ -13,6 +13,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.notesappwithsqlite.databaseController.UserDatabaseHelper
 import com.google.android.material.card.MaterialCardView
 
 class SignUpActivity : AppCompatActivity() {
