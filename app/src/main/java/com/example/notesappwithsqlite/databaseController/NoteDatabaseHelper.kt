@@ -9,16 +9,15 @@ import android.os.Build
 import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import com.example.notesappwithsqlite.model.Note
 import com.example.notesappwithsqlite.model.Folder
+import com.example.notesappwithsqlite.model.Note
 import java.time.LocalDateTime
 
-class NoteDatabaseHelper(context: Context) :
-    SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class NoteDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
         private const val DATABASE_NAME = "notesapp.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3  // Updated version for migration
 
         // Notes Table
         private const val TABLE_NOTES = "allnotes"
@@ -33,7 +32,8 @@ class NoteDatabaseHelper(context: Context) :
         private const val TABLE_FOLDERS = "allfolders"
         private const val COLUMN_FOLDER_ID_PRIMARY = "id"
         private const val COLUMN_FOLDER_NAME = "name"
-        private const val COLUMN_USER_ID = "user_id" // Add userId column
+        private const val COLUMN_USER_ID = "user_id"
+        private const val COLUMN_DATE1 = "date" // Ensured consistency
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -41,17 +41,18 @@ class NoteDatabaseHelper(context: Context) :
             CREATE TABLE $TABLE_FOLDERS (
                 $COLUMN_FOLDER_ID_PRIMARY INTEGER PRIMARY KEY AUTOINCREMENT,
                 $COLUMN_FOLDER_NAME TEXT NOT NULL,
-                $COLUMN_USER_ID INTEGER NOT NULL
+                $COLUMN_USER_ID INTEGER NOT NULL,
+                $COLUMN_DATE1 TEXT NOT NULL
             )
         """.trimIndent()
 
         val createNotesTable = """
             CREATE TABLE $TABLE_NOTES (
-                $COLUMN_NOTE_ID INTEGER PRIMARY KEY AUTOINCREMENT, 
+                $COLUMN_NOTE_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 $COLUMN_FOLDER_ID INTEGER NOT NULL,
-                $COLUMN_TITLE TEXT,  
-                $COLUMN_CONTENT TEXT, 
-                $COLUMN_DATE TEXT,    
+                $COLUMN_TITLE TEXT,
+                $COLUMN_CONTENT TEXT,
+                $COLUMN_DATE TEXT,
                 $COLUMN_SUBJECT TEXT,
                 FOREIGN KEY($COLUMN_FOLDER_ID) REFERENCES $TABLE_FOLDERS($COLUMN_FOLDER_ID_PRIMARY) ON DELETE CASCADE
             )
@@ -62,21 +63,22 @@ class NoteDatabaseHelper(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        db?.execSQL("DROP TABLE IF EXISTS $TABLE_NOTES")
-        db?.execSQL("DROP TABLE IF EXISTS $TABLE_FOLDERS")
-        onCreate(db)
+        if (oldVersion < 3) {
+            db?.execSQL("ALTER TABLE $TABLE_FOLDERS ADD COLUMN $COLUMN_DATE1 TEXT NOT NULL DEFAULT ''")
+        }
     }
 
-    /** Get All Folders by User */
-    fun getFoldersByUser(userId: Int): List<Folder> {
+    /** Get All Folders */
+    fun getAllFolders(): List<Folder> {
         val folderList = mutableListOf<Folder>()
         val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM $TABLE_FOLDERS WHERE $COLUMN_USER_ID = ?", arrayOf(userId.toString()))
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_FOLDERS", null)
 
         while (cursor.moveToNext()) {
             val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FOLDER_ID_PRIMARY))
             val name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FOLDER_NAME))
-            val date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))
+            val date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE1))
+            val userId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_USER_ID))
             folderList.add(Folder(id, name, date, userId))
         }
 
@@ -85,47 +87,40 @@ class NoteDatabaseHelper(context: Context) :
         return folderList
     }
 
-    /** Insert a Note linked to a Folder */
+    /** Insert a Folder */
     @RequiresApi(Build.VERSION_CODES.O)
-    fun insertFolder(folderName: String, userId: Int?, input: EditText) : Long {
-       try {
-           val db = writableDatabase
+    fun insertFolder(folderName: String, userId: Int?, input: EditText, refreshCallback: () -> Unit) : Long {
+        try {
+            val db = writableDatabase
+            val localDate = LocalDateTime.now()
+            val date = localDate.toString()
 
-           val localDate = LocalDateTime.now()
-           var date = localDate.toString()
-           val values = ContentValues().apply {
-               put(COLUMN_FOLDER_NAME, folderName)
-               put(COLUMN_DATE, date)  // Include date
-               put(COLUMN_USER_ID, userId)
-           }
-           val folderId = db.insert(TABLE_FOLDERS, null, values)
-           db.close()
-           input.setText("")
-           Toast.makeText(input.context, "Folder added successfully!", Toast.LENGTH_SHORT).show()
-           return folderId
+            val values = ContentValues().apply {
+                put(COLUMN_FOLDER_NAME, folderName)
+                put(COLUMN_USER_ID, userId)
+                put(COLUMN_DATE1, date) // Fixed column reference
+            }
+
+            val folderId = db.insert(TABLE_FOLDERS, null, values)
+            db.close()
+            input.setText("")
+            Toast.makeText(input.context, "Folder added successfully!", Toast.LENGTH_SHORT).show()
+            refreshCallback()
+            return folderId
         } catch (e: Exception) {
             Toast.makeText(input.context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             return -1
         }
     }
 
-    /** Get All Folders */
-    fun getAllFolders(userId: Int): List<Folder> {
-
-        val folderList = mutableListOf<Folder>()
-        val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM $TABLE_FOLDERS WHERE $COLUMN_USER_ID = ?", arrayOf(userId.toString()))
-
-        while (cursor.moveToNext()) {
-            val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FOLDER_ID_PRIMARY))
-            val name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FOLDER_NAME))
-            val date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))  // Now valid
-            folderList.add(Folder(id, name, date, userId))
+    /** Update Folder */
+    fun updateFolder(folder: Folder) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_FOLDER_NAME, folder.name)
         }
-
-        cursor.close()
+        db.update(TABLE_FOLDERS, values, "$COLUMN_FOLDER_ID_PRIMARY = ?", arrayOf(folder.id.toString()))
         db.close()
-        return folderList
     }
 
     /** Update Note */
@@ -141,9 +136,11 @@ class NoteDatabaseHelper(context: Context) :
         db.close()
     }
 
-    fun insertNote(note: Note, i: Int) {
+    /** Insert Note */
+    fun insertNote(note: Note, folderId: Int) {
         val db = writableDatabase
         val values = ContentValues().apply {
+            put(COLUMN_FOLDER_ID, folderId)
             put(COLUMN_SUBJECT, note.subject)
             put(COLUMN_DATE, note.date)
             put(COLUMN_TITLE, note.title)

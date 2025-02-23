@@ -2,7 +2,7 @@ package com.example.notesappwithsqlite.model
 
 data class Folder(
     val id: Int,
-    val name: String,
+    var name: String,
     val date: String,
     val userId: Int // Add userId field
 )

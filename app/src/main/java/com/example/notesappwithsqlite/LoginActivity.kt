@@ -36,10 +36,12 @@ class LoginActivity : AppCompatActivity() {
                 val userId = userDb.getUserId(username, password)
                 if (userId != null) {
                     Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
-
+                    Toast.makeText(this, "User ID: $userId", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this, DashboardActivity::class.java)
                     intent.putExtra("USERNAME", username)  // Passing username
                     intent.putExtra("USER_ID", userId)  // Passing userId
+
+
 
                     startActivity(intent)
                     finish()
