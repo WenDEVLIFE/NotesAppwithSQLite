@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="text">#9F91AC</color>
+    <color name="orange">#ed5f1e</color>
+    <color name="cardColor">#393845</color>
+    <color name="blueESS">#8196E9</color>
+    <color name="orangeESS">#FE655F</color>
+
+    <color name="background">#F2F4F9</color>
+    <color name="darkblue">#50A2DA</color>
+    <color name="darkestblue">#36A0EB</color>
+    <color name="darkyblue">#2770A4</color>
+    <color name="lighblue">#B9D1FD</color>
+    <color name="grayblue">#C1CDE5</color>
+    <color name="cardNewColor">#61AAC5</color>
+    <color name="cardNewDarkerColor">#4C869B</color>
+</resources>

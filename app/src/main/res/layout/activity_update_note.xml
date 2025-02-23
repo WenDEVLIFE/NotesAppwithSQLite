@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UpdateNoteActivity"
+    android:padding="16dp"
+    android:background="@color/cardNewDarkerColor">
+
+    <TextView
+        android:id="@+id/tvEditNotes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edit Note"
+        android:fontFamily="@font/product_sans_bold"
+        android:textColor="@color/white"
+        android:textSize="24sp"/>
+
+    <ImageView
+        android:id="@+id/updateSaveButton"
+        android:layout_width="37dp"
+        android:layout_height="38dp"
+        android:src="@drawable/baseline_done_24"
+        android:layout_alignParentEnd="true"/>
+
+    <!-- Date Picker -->
+    <EditText
+        android:id="@+id/etUpdateDate"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:hint="Select Date"
+        android:padding="12dp"
+        android:textSize="20sp"
+        android:fontFamily="@font/poppins"
+        android:background="@drawable/credentials_et"
+        android:textColor="@color/black"
+        android:elevation="8dp"
+        android:textColorHint="@color/text"
+        android:focusable="false"
+        android:clickable="true"
+        android:layout_below="@+id/tvEditNotes"
+        android:layout_marginTop="10dp"/>
+
+    <!-- Title Field -->
+    <EditText
+        android:id="@+id/etUpdateTitle"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:hint="Enter Subject:"
+        android:padding="12dp"
+        android:textSize="20sp"
+        android:fontFamily="@font/poppins"
+        android:background="@drawable/credentials_et"
+        android:maxLines="1"
+        android:textColor="@color/black"
+        android:elevation="8dp"
+        android:textColorHint="@color/text"
+        android:layout_below="@+id/etUpdateDate"
+        android:layout_marginTop="10dp"/>
+
+    <!-- Subject Title Field -->
+    <EditText
+        android:id="@+id/etUpdateSubjectTitle"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:hint="Enter Title:"
+        android:padding="12dp"
+        android:textSize="20sp"
+        android:fontFamily="@font/poppins"
+        android:background="@drawable/credentials_et"
+        android:maxLines="1"
+        android:textColor="@color/black"
+        android:elevation="8dp"
+        android:textColorHint="@color/text"
+        android:layout_below="@+id/etUpdateTitle"
+        android:layout_marginTop="10dp"/>
+
+    <!-- Description Field -->
+    <EditText
+        android:id="@+id/etUpdateDescription"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:hint="Enter Description"
+        android:fontFamily="@font/poppins"
+        android:textSize="20sp"
+        android:padding="12dp"
+        android:gravity="top"
+        android:background="@drawable/credentials_et"
+        android:textColor="@color/black"
+        android:elevation="8dp"
+        android:textColorHint="@color/text"
+        android:layout_below="@+id/etUpdateSubjectTitle"
+        android:layout_marginTop="10dp"/>
+</RelativeLayout>
