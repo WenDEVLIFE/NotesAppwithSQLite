@@ -29,6 +29,7 @@ class DashboardActivity : AppCompatActivity() {
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        LoadStats()
         val username = intent.getStringExtra("USERNAME") ?: "Guest"
         val userId = intent.getIntExtra("USER_ID", -1)
 
@@ -103,5 +104,17 @@ class DashboardActivity : AppCompatActivity() {
     private fun refreshFolders() {
         folderList = db.getAllFolders()
         folderAdapter.refreshData(folderList)
+    }
+
+    fun LoadStats(){
+        db = NoteDatabaseHelper(this)
+        val countFolder = db.countFolders()
+        val countNote = db.countNotes()
+
+        val countFolderText = binding.textView2
+        val countNoteText = binding.textView3
+        countFolderText.text = "$countFolder"
+        countNoteText.text = "$countNote"
+
     }
 }

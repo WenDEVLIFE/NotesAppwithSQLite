@@ -221,4 +221,30 @@ class NoteDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
             null
         }
     }
+
+    fun countFolders(): Int {
+        val db = readableDatabase
+        val cursor: Cursor = db.rawQuery("SELECT COUNT(*) FROM $TABLE_FOLDERS", null)
+        val folderCount = if (cursor.moveToFirst()) {
+            cursor.getInt(0)
+        } else {
+            0
+        }
+        cursor.close()
+        db.close()
+        return folderCount
+    }
+
+    fun countNotes(): Int {
+        val db = readableDatabase
+        val cursor: Cursor = db.rawQuery("SELECT COUNT(*) FROM $TABLE_NOTES", null)
+        val noteCount = if (cursor.moveToFirst()) {
+            cursor.getInt(0)
+        } else {
+            0
+        }
+        cursor.close()
+        db.close()
+        return noteCount
+    }
 }
