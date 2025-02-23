@@ -2,6 +2,7 @@ package com.example.notesappwithsqlite.adapter
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,11 +12,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.notesappwithsqlite.MainActivity
 import com.example.notesappwithsqlite.R
 import com.example.notesappwithsqlite.databaseController.NoteDatabaseHelper
 import com.example.notesappwithsqlite.model.Folder
 
-class FolderAdapter(private var folders: List<Folder>, private val context: Context) : RecyclerView.Adapter<FolderAdapter.FolderViewHolder>() {
+class FolderAdapter(private var folders: List<Folder>, private val context: Context, private val username: String) : RecyclerView.Adapter<FolderAdapter.FolderViewHolder>() {
 
     private var db: NoteDatabaseHelper = NoteDatabaseHelper(context)
 
@@ -24,6 +26,7 @@ class FolderAdapter(private var folders: List<Folder>, private val context: Cont
         val dateTextView: TextView = itemView.findViewById(R.id.tvShowDate)
         val updateButton: ImageView = itemView.findViewById(R.id.ivNoteEdit)
         val deleteButton: ImageView = itemView.findViewById(R.id.ivDeleteNote)
+        val openfolderButton: ImageView = itemView.findViewById(R.id.openfolder)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FolderViewHolder {
@@ -46,6 +49,14 @@ class FolderAdapter(private var folders: List<Folder>, private val context: Cont
             db.deleteFolder(folder.id)
             refreshData(db.getAllFolders())
             Toast.makeText(context, "Folder deleted successfully!", Toast.LENGTH_SHORT).show()
+        }
+
+        holder.openfolderButton.setOnClickListener {
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra("FOLDER_ID", folder.id)
+            intent.putExtra("FOLDER_NAME", folder.name)
+            intent.putExtra("USERNAME", username)
+            context.startActivity(intent)
         }
     }
 

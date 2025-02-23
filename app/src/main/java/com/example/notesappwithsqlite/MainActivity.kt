@@ -5,15 +5,9 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.notesappwithsqlite.databinding.ActivityMainBinding
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -23,14 +17,13 @@ import androidx.core.app.NotificationCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.notesappwithsqlite.adapter.NotesAdapter
 import com.example.notesappwithsqlite.databaseController.NoteDatabaseHelper
-import com.example.notesappwithsqlite.databinding.ActivityAddNoteBinding
-import com.example.notesappwithsqlite.model.Note
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var db: NoteDatabaseHelper
-    private lateinit var notesAdapter: NotesAdapter   //RV
+    private lateinit var notesAdapter: NotesAdapter
+    var folderID = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +31,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val username = intent.getStringExtra("USERNAME") ?: "Guest"
+        folderID = intent.getIntExtra("FOLDER_ID", 0)
+        print("Folder ID: $folderID")
+        print("Username: $username")
+        Toast.makeText(this, "Folder ID: $folderID", Toast.LENGTH_SHORT).show()
 
         // Set username in Navigation Drawer header
         val headerView = binding.navView.getHeaderView(0)
@@ -45,10 +42,11 @@ class MainActivity : AppCompatActivity() {
         profileNameTextView.text = username
 
         db = NoteDatabaseHelper(this)
-        // notesAdapter = NotesAdapter(db.getAllNotes(), this)
+        refreshNotes()
 
-        binding.btnAddNote.setOnClickListener(){
+        binding.btnAddNote.setOnClickListener {
             val intent = Intent(this, AddNoteActivity::class.java)
+            intent.putExtra("FOLDER_ID", folderID) // Pass folderID to AddNoteActivity
             startActivity(intent)
         }
 
@@ -74,10 +72,21 @@ class MainActivity : AppCompatActivity() {
             drawerLayout.closeDrawers() // Close drawer after selection
             true
         }
-
-
-
     }
+
+    override fun onResume() {
+        super.onResume()
+        refreshNotes()
+        createNotificationChannel()
+        sendNotification("We will remind you the notes a day before!")
+    }
+
+    private fun refreshNotes() {
+        val notes = db.getAllNotesByFolderId(folderID)
+        notesAdapter = NotesAdapter(notes, this)
+        binding.rvNotes.adapter = notesAdapter
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
@@ -91,6 +100,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -105,6 +115,7 @@ class MainActivity : AppCompatActivity() {
             notificationManager.createNotificationChannel(channel)
         }
     }
+
     private fun sendNotification(noteTitle: String) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -117,29 +128,5 @@ class MainActivity : AppCompatActivity() {
             .build()
 
         notificationManager.notify(System.currentTimeMillis().toInt(), notification)
-    }
-
-
-
-    override fun onResume() {
-        super.onResume()
-      //  notesAdapter.refreshData(db.getAllNotes())
-        createNotificationChannel()
-        sendNotification("We will remind you the notes a day before!")
-    }
-
-    override fun onStart() {
-        super.onStart()
-        /* if(db.getNoteCount() == 0){
-            val note = Note(
-                0,
-                "General",
-                "2025-02-12",
-                "Welcome to AcadPlanner!",
-                "Created by developers: Rhianne Magsino and Hannah Mae Moran"
-            )
-            db.insertNote(note)
-
-        }*/
     }
 }

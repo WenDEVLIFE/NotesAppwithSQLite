@@ -1,12 +1,17 @@
 package com.example.notesappwithsqlite
 
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.DatePickerDialog
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.notesappwithsqlite.databaseController.NoteDatabaseHelper
 import com.example.notesappwithsqlite.databaseController.ReminderReceiver
 import com.example.notesappwithsqlite.databinding.ActivityAddNoteBinding
@@ -20,11 +25,14 @@ class AddNoteActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddNoteBinding
     private lateinit var db: NoteDatabaseHelper
     private var selectedDate: String = ""  // Stores selected date
+    var folderId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddNoteBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        folderId = intent.getIntExtra("FOLDER_ID", 0)
 
         db = NoteDatabaseHelper(this)
 
@@ -32,6 +40,12 @@ class AddNoteActivity : AppCompatActivity() {
         binding.etDate.setOnClickListener {
             showDatePicker()
         }
+
+        // Populate the spinner with priority levels
+        val priorityLevels = arrayOf("Low", "Medium", "High")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, priorityLevels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerPriority.adapter = adapter
 
         // Save Button Click
         binding.saveButton.setOnClickListener {
@@ -68,21 +82,26 @@ class AddNoteActivity : AppCompatActivity() {
         val title = binding.etTitle.text.toString().trim()
         val subjectTitle = binding.etSubjectTitle.text.toString().trim()
         val description = binding.etDescription.text.toString().trim()
+        val priority = binding.spinnerPriority.selectedItem.toString()
 
         if (title.isEmpty() || subjectTitle.isEmpty() || description.isEmpty() || selectedDate.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields!", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val note = Note(0, subjectTitle, selectedDate, title, description)
-        db.insertNote(note , 1) // 1 is the folder id
+        val note = Note(0, 0, subjectTitle, selectedDate, title, description , priority)
+        db.insertNote(note, folderId)
         Toast.makeText(this, "Note Saved!", Toast.LENGTH_SHORT).show()
 
         // 🔔 Immediate notification
         scheduleImmediateNotification("$title is now saved and will remind you 1 day before!", description)
 
         // 📅 Schedule notification 1 day before
-        scheduleNotification("Reminder! Your note: $title is scheduled today!", description, selectedDate)
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.SCHEDULE_EXACT_ALARM) == PackageManager.PERMISSION_GRANTED) {
+            scheduleNotification("Reminder! Your note: $title is scheduled today!", description, selectedDate)
+        } else {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.SCHEDULE_EXACT_ALARM), 1)
+        }
 
         finish()
     }
@@ -96,6 +115,7 @@ class AddNoteActivity : AppCompatActivity() {
         sendBroadcast(intent) // 🔥 Immediately trigger the notification
     }
 
+    @SuppressLint("ScheduleExactAlarm")
     private fun scheduleNotification(title: String, message: String, date: String) {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, ReminderReceiver::class.java).apply {
@@ -119,5 +139,16 @@ class AddNoteActivity : AppCompatActivity() {
 
         // Set the alarm
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            val title = binding.etTitle.text.toString().trim()
+            val description = binding.etDescription.text.toString().trim()
+            scheduleNotification("Reminder! Your note: $title is scheduled today!", description, selectedDate)
+        } else {
+            Toast.makeText(this, "Permission denied to schedule exact alarms", Toast.LENGTH_SHORT).show()
+        }
     }
 }

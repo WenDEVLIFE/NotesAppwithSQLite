@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build
+import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -17,7 +18,7 @@ class NoteDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     companion object {
         private const val DATABASE_NAME = "notesapp.db"
-        private const val DATABASE_VERSION = 3  // Updated version for migration
+        private const val DATABASE_VERSION = 4  // Updated version for migration
 
         // Notes Table
         private const val TABLE_NOTES = "allnotes"
@@ -27,6 +28,7 @@ class NoteDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         private const val COLUMN_DATE = "date"
         private const val COLUMN_TITLE = "title"
         private const val COLUMN_CONTENT = "content"
+        private const val COLUMN_PRIORITY = "priority"
 
         // Folders Table
         private const val TABLE_FOLDERS = "allfolders"
@@ -66,7 +68,11 @@ class NoteDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         if (oldVersion < 3) {
             db?.execSQL("ALTER TABLE $TABLE_FOLDERS ADD COLUMN $COLUMN_DATE1 TEXT NOT NULL DEFAULT ''")
         }
+        if (oldVersion < 4) {
+            db?.execSQL("ALTER TABLE $TABLE_NOTES ADD COLUMN $COLUMN_PRIORITY TEXT DEFAULT 'Low'") // Add priority column
+        }
     }
+
 
     /** Get All Folders */
     fun getAllFolders(): List<Folder> {
@@ -131,6 +137,7 @@ class NoteDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
             put(COLUMN_DATE, note.date)
             put(COLUMN_TITLE, note.title)
             put(COLUMN_CONTENT, note.content)
+            put(COLUMN_PRIORITY, note.priority)
         }
         db.update(TABLE_NOTES, values, "$COLUMN_NOTE_ID = ?", arrayOf(note.id.toString()))
         db.close()
@@ -145,6 +152,7 @@ class NoteDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
             put(COLUMN_DATE, note.date)
             put(COLUMN_TITLE, note.title)
             put(COLUMN_CONTENT, note.content)
+            put(COLUMN_PRIORITY, note.priority)
         }
         db.insert(TABLE_NOTES, null, values)
         db.close()
@@ -165,21 +173,45 @@ class NoteDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
     }
 
     /** Get a Specific Note by ID */
-    fun getNoteById(noteID: Int): Note {
+    fun getAllNotesByFolderId(folderId: Int): List<Note> {
+        val notesList = mutableListOf<Note>()
         val db = readableDatabase
-        val cursor: Cursor = db.rawQuery("SELECT * FROM $TABLE_NOTES WHERE $COLUMN_NOTE_ID = ?", arrayOf(noteID.toString()))
+        val cursor: Cursor = db.rawQuery("SELECT * FROM $TABLE_NOTES WHERE $COLUMN_FOLDER_ID = ?", arrayOf(folderId.toString()))
 
-        return if (cursor.moveToFirst()) {
+        while (cursor.moveToNext()) {
             val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_NOTE_ID))
+            val folderId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FOLDER_ID))
             val subject = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SUBJECT))
             val date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))
             val title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE))
             val content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT))
+            val priority = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY))
+            notesList.add(Note(folderId, id, subject, date, title, content, priority))
+        }
+
+        cursor.close()
+        db.close()
+        return notesList
+    }
+
+    /** Get a Specific Note by ID */
+    fun getNoteById(noteId: Int): Note? {
+        val db = readableDatabase
+        val cursor: Cursor = db.rawQuery("SELECT * FROM $TABLE_NOTES WHERE $COLUMN_NOTE_ID = ?", arrayOf(noteId.toString()))
+
+        return if (cursor.moveToFirst()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_NOTE_ID))
+            val folderId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FOLDER_ID))
+            val subject = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SUBJECT))
+            val date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))
+            val title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE))
+            val content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT))
+            val priority = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY))
             cursor.close()
-            Note(id, subject, date, title, content)
+            Note(folderId, id, subject, date, title, content, priority)
         } else {
             cursor.close()
-            throw Exception("Note not found")
+            null
         }
     }
 }

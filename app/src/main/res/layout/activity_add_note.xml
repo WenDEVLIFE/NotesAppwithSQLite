@@ -61,6 +61,20 @@
         android:textColorHint="@color/text"/>
 
     <!-- Subject Title Field -->
+
+    <Spinner
+        android:id="@+id/spinnerPriority"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@+id/etDescription"
+        android:layout_marginTop="18dp"
+        android:background="@drawable/credentials_et"
+        android:elevation="8dp"
+        android:fontFamily="@font/poppins"
+        android:padding="12dp"
+        android:textColor="@color/black"
+        android:textSize="20sp" />
+
     <EditText
         android:id="@+id/etSubjectTitle"
         android:layout_width="match_parent"
@@ -81,7 +95,7 @@
     <EditText
         android:id="@+id/etDescription"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="300dp"
         android:hint="Enter Description"
         android:fontFamily="@font/poppins"
         android:textSize="20sp"

@@ -2,6 +2,7 @@ package com.example.notesappwithsqlite
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.notesappwithsqlite.databaseController.NoteDatabaseHelper
@@ -23,16 +24,31 @@ class UpdateNoteActivity : AppCompatActivity() {
         db = NoteDatabaseHelper(this)
         noteID = intent.getIntExtra("note_id", -1)
 
+
         if (noteID == -1) {
             finish()
             return
         }
 
         val note = db.getNoteById(noteID)
-        binding.etUpdateTitle.setText(note.title)
-        binding.etUpdateDescription.setText(note.content)
-        binding.etUpdateDate.setText(note.date) // Ensure Note model includes `date`
-        binding.etUpdateSubjectTitle.setText(note.subject) // Ensure Note model includes `subject`
+        if (note != null) {
+            binding.etUpdateTitle.setText(note.title)
+            binding.etUpdateDescription.setText(note.content)
+            binding.etUpdateDate.setText(note.date)
+            binding.etUpdateSubjectTitle.setText(note.subject)
+
+            // Set the spinner to the current priority
+            val priorityLevels = arrayOf("Low", "Medium", "High")
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, priorityLevels)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            binding.spinnerPriority.adapter = adapter
+            val priorityPosition = priorityLevels.indexOf(note.priority)
+            binding.spinnerPriority.setSelection(priorityPosition)
+        } else {
+            Toast.makeText(this, "Note not found", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
         // Date Picker Dialog
         binding.etUpdateDate.setOnClickListener {
@@ -54,14 +70,22 @@ class UpdateNoteActivity : AppCompatActivity() {
             val newContent = binding.etUpdateDescription.text.toString().trim()
             val newDate = binding.etUpdateDate.text.toString().trim()
             val newSubjectTitle = binding.etUpdateSubjectTitle.text.toString().trim()
+            val newPriority = binding.spinnerPriority.selectedItem.toString()
 
             if (newTitle.isEmpty() || newContent.isEmpty() || newDate.isEmpty() || newSubjectTitle.isEmpty()) {
                 Toast.makeText(this, "All fields must be filled!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val updatedNote =
-                Note(noteID, newSubjectTitle, newDate, newTitle, newContent) // Correct order
+            val updatedNote = Note(
+                note.folderID,
+                noteID,
+                newTitle,
+                newContent,
+                newDate,
+                newSubjectTitle,
+                newPriority
+            )
             db.updateNote(updatedNote)
 
             Toast.makeText(this, "Changes Saved!", Toast.LENGTH_SHORT).show()

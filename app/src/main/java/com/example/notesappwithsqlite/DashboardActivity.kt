@@ -40,7 +40,7 @@ class DashboardActivity : AppCompatActivity() {
         db.getAllFolders()
 
         folderList = db.getAllFolders()
-        folderAdapter = FolderAdapter(folderList, this)
+        folderAdapter = FolderAdapter(folderList, this, username)
         binding.recyclerViewFolders.layoutManager = LinearLayoutManager(this)
         binding.recyclerViewFolders.adapter = folderAdapter
 
