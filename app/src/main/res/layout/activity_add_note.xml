@@ -18,6 +18,17 @@
         android:textColor="@color/white"
         android:textSize="24sp"/>
 
+    <TextView
+        android:id="@+id/tvAddNotes2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etDescription"
+        android:layout_marginTop="26dp"
+        android:fontFamily="@font/product_sans_bold"
+        android:text="Priority Level"
+        android:textColor="@color/white"
+        android:textSize="24sp" />
+
     <ImageView
         android:id="@+id/saveButton"
         android:layout_width="37dp"
@@ -66,8 +77,8 @@
         android:id="@+id/spinnerPriority"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:layout_below="@+id/etDescription"
-        android:layout_marginTop="18dp"
+        android:layout_below="@+id/tvAddNotes2"
+        android:layout_marginTop="16dp"
         android:background="@drawable/credentials_et"
         android:elevation="8dp"
         android:fontFamily="@font/poppins"
