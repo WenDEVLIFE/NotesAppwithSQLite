@@ -24,6 +24,7 @@ class NotesAdapter(private var notes: List<Note>, private val context: Context) 
         val dateTextView: TextView = itemView.findViewById(R.id.tvShowDate)
         val subjectTextView: TextView = itemView.findViewById(R.id.tvShowSubjectTitle)
         val contentTextView: TextView = itemView.findViewById(R.id.tvShowContent)
+        val priorityTextView: TextView = itemView.findViewById(R.id.tvShowContent2)
         val updateButton: ImageView = itemView.findViewById(R.id.ivNoteEdit)
         val deleteButton: ImageView = itemView.findViewById(R.id.ivDeleteNote)
     }
@@ -41,6 +42,7 @@ class NotesAdapter(private var notes: List<Note>, private val context: Context) 
         holder.dateTextView.text = note.date
         holder.subjectTextView.text = note.subject
         holder.contentTextView.text = note.content
+        holder.priorityTextView.text = note.priority
 
         // Set the card background color based on the note priority
         val colorId = when (note.priority) {

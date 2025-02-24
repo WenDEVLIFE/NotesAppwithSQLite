@@ -83,6 +83,16 @@
             android:textColor="#ECE6FF"
             android:maxLines="3"
             android:text="Content" />
+
+        <TextView
+            android:id="@+id/tvShowContent2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/poppins"
+            android:maxLines="3"
+            android:text="Priority level:"
+            android:textColor="#ECE6FF" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

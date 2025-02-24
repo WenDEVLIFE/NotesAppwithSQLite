@@ -91,6 +91,7 @@ class DashboardActivity : AppCompatActivity() {
             val folderName = input.text.toString()
             db.insertFolder(folderName, userId, input) {
                 refreshFolders()
+                LoadStats()  // Update the folder count
             }
             dialog.dismiss()
         }
@@ -115,6 +116,5 @@ class DashboardActivity : AppCompatActivity() {
         val countNoteText = binding.textView3
         countFolderText.text = "$countFolder"
         countNoteText.text = "$countNote"
-
     }
 }
