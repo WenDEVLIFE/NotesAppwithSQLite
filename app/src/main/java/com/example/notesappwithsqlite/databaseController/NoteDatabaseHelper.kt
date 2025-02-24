@@ -40,28 +40,47 @@ class NoteDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     override fun onCreate(db: SQLiteDatabase?) {
         val createFoldersTable = """
-            CREATE TABLE $TABLE_FOLDERS (
-                $COLUMN_FOLDER_ID_PRIMARY INTEGER PRIMARY KEY AUTOINCREMENT,
-                $COLUMN_FOLDER_NAME TEXT NOT NULL,
-                $COLUMN_USER_ID INTEGER NOT NULL,
-                $COLUMN_DATE1 TEXT NOT NULL
-            )
-        """.trimIndent()
+        CREATE TABLE $TABLE_FOLDERS (
+            $COLUMN_FOLDER_ID_PRIMARY INTEGER PRIMARY KEY AUTOINCREMENT,
+            $COLUMN_FOLDER_NAME TEXT NOT NULL,
+            $COLUMN_USER_ID INTEGER NOT NULL,
+            $COLUMN_DATE1 TEXT NOT NULL
+        )
+    """.trimIndent()
 
         val createNotesTable = """
-            CREATE TABLE $TABLE_NOTES (
-                $COLUMN_NOTE_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                $COLUMN_FOLDER_ID INTEGER NOT NULL,
-                $COLUMN_TITLE TEXT,
-                $COLUMN_CONTENT TEXT,
-                $COLUMN_DATE TEXT,
-                $COLUMN_SUBJECT TEXT,
-                FOREIGN KEY($COLUMN_FOLDER_ID) REFERENCES $TABLE_FOLDERS($COLUMN_FOLDER_ID_PRIMARY) ON DELETE CASCADE
-            )
-        """.trimIndent()
+        CREATE TABLE $TABLE_NOTES (
+            $COLUMN_NOTE_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            $COLUMN_FOLDER_ID INTEGER NOT NULL,
+            $COLUMN_TITLE TEXT,
+            $COLUMN_CONTENT TEXT,
+            $COLUMN_DATE TEXT,
+            $COLUMN_SUBJECT TEXT,
+            $COLUMN_PRIORITY TEXT DEFAULT 'Low', 
+            FOREIGN KEY($COLUMN_FOLDER_ID) REFERENCES $TABLE_FOLDERS($COLUMN_FOLDER_ID_PRIMARY) ON DELETE CASCADE
+        )
+    """.trimIndent()
 
         db?.execSQL(createFoldersTable)
         db?.execSQL(createNotesTable)
+    }
+
+    fun ensurePriorityColumnExists() {
+        val db = writableDatabase
+        val cursor = db.rawQuery("PRAGMA table_info($TABLE_NOTES)", null)
+        var columnExists = false
+        while (cursor.moveToNext()) {
+            val columnName = cursor.getString(cursor.getColumnIndexOrThrow("name"))
+            if (columnName == COLUMN_PRIORITY) {
+                columnExists = true
+                break
+            }
+        }
+        cursor.close()
+        if (!columnExists) {
+            db.execSQL("ALTER TABLE $TABLE_NOTES ADD COLUMN $COLUMN_PRIORITY TEXT DEFAULT 'Low'")
+        }
+        db.close()
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -72,7 +91,6 @@ class NoteDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
             db?.execSQL("ALTER TABLE $TABLE_NOTES ADD COLUMN $COLUMN_PRIORITY TEXT DEFAULT 'Low'") // Add priority column
         }
     }
-
 
     /** Get All Folders */
     fun getAllFolders(): List<Folder> {
